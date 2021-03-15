@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-from Crypto.Hash import HMAC, SHA256
+import hmac
+import hashlib
 import inspect
 import os
 import sys
@@ -8,6 +9,7 @@ import re
 import random
 import requests
 from enum import Enum
+from string import printable
 
 """ <config> """
 # SERVICE INFO
@@ -35,8 +37,7 @@ def generate_random(alph, length):
 
 
 def generate_pswd(flag_id):
-    h = HMAC.new(SECRET, digestmod=SHA256)
-    h.update(flag_id.encode())
+    h = hmac.new(key = SECRET, msg = flag_id.encode(), digestmod=hashlib.sha256)
     return h.hexdigest()
     
 
