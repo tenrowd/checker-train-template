@@ -36,7 +36,11 @@ def check_login_register(host):
 
     session.post(f"http://{host}:{PORT}/signup", data = data)
 
-    t = session.post(f"http://{host}:{PORT}/auth", data = data)
+    session.post(f"http://{host}:{PORT}/auth", data = data)
+
+    t = session.get(f"http://{host}:{PORT}/bar")
+
+    session.post(f"http://{host}:{PORT}/logout")
 
     if "Honey Bar" in t.text:
         return True
@@ -61,7 +65,7 @@ def check_double_register(host):
 
     session.post(f"http://{host}:{PORT}/logout")
 
-    p_new = generate_random(printable, 10)
+    p_new = generate_random(printable, 5)
     data = {"username": name, "password": p_new}
 
     session.post(f"http://{host}:{PORT}/signup", data = data)
@@ -69,6 +73,8 @@ def check_double_register(host):
     session.post(f"http://{host}:{PORT}/auth", data = data)
 
     t = session.get(f"http://{host}:{PORT}/bar")
+
+    session.post(f"http://{host}:{PORT}/logout")
 
     if "Honey Bar" not in t.text:
         return True
@@ -97,6 +103,8 @@ def check_list_of_users(host):
     session.post(f"http://{host}:{PORT}/auth", data = data)
 
     t = session.get(f"http://{host}:{PORT}/bar")
+
+    session.post(f"http://{host}:{PORT}/logout")
 
     if name in t.text and second_one in t.text:
         return True
