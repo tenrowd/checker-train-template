@@ -29,6 +29,20 @@ SECRET = b"pQw>1=yj%Ln'j=.Jc+KUH$WA_@B%/dW$6kctkjp}"
 
 
 def check(host):
+    try:
+        name = generate_random(printable, 20)
+        p = generate_pswd(name)
+        data = {"username": name, "password": p}
+
+        session = requests.Session()
+        
+        session.post(f"http://{host}:{PORT}/signup", data = data)
+
+        
+    except Exception:
+        return ExitStatus.DOWN
+
+
     die(ExitStatus.CHECKER_ERROR, "Not implemented")
 
 
@@ -112,11 +126,11 @@ def _main():
         elif action == "put":
             host, flag_id, flag, vuln = args
             result = put(host, flag_id, flag, vuln)
-            print(result)
+            return result
         elif action == "get":
             host, flag_id, flag, vuln = args
             result = get(host, flag_id, flag, vuln)
-            print(result)
+            return result
         else:
             raise IndexError
     except ValueError:
