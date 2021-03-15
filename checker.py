@@ -126,11 +126,11 @@ def _main():
         elif action == "put":
             host, flag_id, flag, vuln = args
             result = put(host, flag_id, flag, vuln)
-            return result
+            die(result)
         elif action == "get":
             host, flag_id, flag, vuln = args
             result = get(host, flag_id, flag, vuln)
-            return result
+            die(result)
         else:
             raise IndexError
     except ValueError:
