@@ -1,17 +1,28 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+from Crypto.Hash import HMAC, SHA256
 import inspect
 import os
 import sys
+import re
+import random
+import requests
 from enum import Enum
 
 """ <config> """
 # SERVICE INFO
-PORT = 8084
+PORT = 8080
 
 # DEBUG -- logs to stderr, TRACE -- verbose log
 DEBUG = os.getenv("DEBUG", False)
 TRACE = os.getenv("TRACE", False)
+
+#regs for a flag
+FLAG_RE = re.compile("[A-Z0-9]{31}=")
+FLAG_ID = re.compile("[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}")
+
+#bad option with secret
+SECRET = b"pQw>1=yj%Ln'j=.Jc+KUH$WA_@B%/dW$6kctkjp}"
 """ </config> """
 
 
@@ -19,12 +30,51 @@ def check(host):
     die(ExitStatus.CHECKER_ERROR, "Not implemented")
 
 
+def generate_random(alph, length):
+    return ''.join(random.choice(alph) for i in range(length))
+
+
+def generate_pswd(flag_id):
+    h = HMAC.new(SECRET, digestmod=SHA256)
+    h.update(flag_id.encode())
+    return h.hexdigest()
+    
+
 def put(host, flag_id, flag, vuln):
-    die(ExitStatus.CHECKER_ERROR, "Not implemented")
+    try: 
+        p = generate_pswd(flag_id)
+        data = {"username": flag_id, "password": p}
+
+        session = requests.Session()
+        session.post(f"http://{host}:{PORT}/signup", data = data)
+
+        session.post(f"http://{host}:{PORT}/auth", data = data)
+
+        session.post(f"http://{host}:{PORT}/addRecipe", {"recipe": flag})
+
+        return ExitStatus.OK
+    except Exception:
+        return ExitStatus.DOWN
 
 
 def get(host, flag_id, flag, vuln):
-    die(ExitStatus.CHECKER_ERROR, "Not implemented")
+    try: 
+        p = generate_pswd(flag_id)
+        data = {"username": flag_id, "password": p}
+
+        session = requests.Session()
+        session.post(f"http://{host}:{PORT}/signup", data = data)
+
+        session.post(f"http://{host}:{PORT}/auth", data = data)
+
+        t = session.get(f"http://{host}:{PORT}/recipes").text
+        
+        if flag in t:
+            return ExitStatus.OK
+        else:
+            return ExitStatus.CORRUPT
+    except Exception:
+        return ExitStatus.DOWN
 
 
 """ <common> """
@@ -60,10 +110,12 @@ def _main():
             check(host)
         elif action == "put":
             host, flag_id, flag, vuln = args
-            put(host, flag_id, flag, vuln)
+            result = put(host, flag_id, flag, vuln)
+            print(result)
         elif action == "get":
             host, flag_id, flag, vuln = args
-            get(host, flag_id, flag, vuln)
+            result = get(host, flag_id, flag, vuln)
+            print(result)
         else:
             raise IndexError
     except ValueError:
