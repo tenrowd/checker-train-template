@@ -67,9 +67,9 @@ def put(host, flag_id, flag, vuln):
 
         session.post(f"http://{host}:{PORT}/addRecipe", {"recipe": flag})
 
-        return ExitStatus.OK
+        die(ExitStatus.OK, "Ok")
     except Exception:
-        return ExitStatus.DOWN
+        die(ExitStatus.DOWN, "Exception recieved")
 
 
 def get(host, flag_id, flag, vuln):
@@ -85,11 +85,11 @@ def get(host, flag_id, flag, vuln):
         t = session.get(f"http://{host}:{PORT}/recipes").text
         
         if flag in t:
-            return ExitStatus.OK
+            die(ExitStatus.OK, "Flag was found")
         else:
-            return ExitStatus.CORRUPT
+            die(ExitStatus.CORRUPT, "Flag wasn't found")
     except Exception:
-        return ExitStatus.DOWN
+        die(ExitStatus.DOWN, "Exception recieved")
 
 
 """ <common> """
@@ -125,12 +125,10 @@ def _main():
             check(host)
         elif action == "put":
             host, flag_id, flag, vuln = args
-            result = put(host, flag_id, flag, vuln)
-            die(result)
+            put(host, flag_id, flag, vuln)
         elif action == "get":
             host, flag_id, flag, vuln = args
-            result = get(host, flag_id, flag, vuln)
-            die(result)
+            get(host, flag_id, flag, vuln)
         else:
             raise IndexError
     except ValueError:
