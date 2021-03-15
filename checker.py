@@ -92,6 +92,13 @@ def check_list_of_users(host):
 
     session.post(f"http://{host}:{PORT}/auth", data = data)
 
+    session.post(f"http://{host}:{PORT}/addRecipe", {"recipe": "flag"})
+
+    t = session.get(f"http://{host}:{PORT}/bar")
+
+    if name not in t.text:
+        return False    
+    
     session.post(f"http://{host}:{PORT}/logout")
 
     second_one = generate_random(printable, 20)
