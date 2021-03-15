@@ -27,23 +27,97 @@ FLAG_ID = re.compile("[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}")
 SECRET = b"pQw>1=yj%Ln'j=.Jc+KUH$WA_@B%/dW$6kctkjp}"
 """ </config> """
 
+def check_login_register(host):
+    name = generate_random(printable, 20)
+    p = generate_pswd(name)
+    data = {"username": name, "password": p}
+
+    session = requests.Session()    
+
+    session.post(f"http://{host}:{PORT}/signup", data = data)
+
+    t = session.post(f"http://{host}:{PORT}/auth", data = data)
+
+    if "Honey Bar" in t.text:
+        return True
+    return False
+
+
+def check_double_register(host):
+    name = generate_random(printable, 20)
+    p = generate_pswd(name)
+    data = {"username": name, "password": p}
+
+    session = requests.Session()    
+
+    session.post(f"http://{host}:{PORT}/signup", data = data)
+
+    session.post(f"http://{host}:{PORT}/auth", data = data)
+
+    t = session.get(f"http://{host}:{PORT}/bar")
+    
+    if "Honey Bar" not in t.text:
+        return True
+
+    session.post(f"http://{host}:{PORT}/logout")
+
+    p_new = generate_random(printable, 10)
+    data = {"username": name, "password": p_new}
+
+    session.post(f"http://{host}:{PORT}/signup", data = data)
+
+    session.post(f"http://{host}:{PORT}/auth", data = data)
+
+    t = session.get(f"http://{host}:{PORT}/bar")
+
+    if "Honey Bar" not in t.text:
+        return True
+    return False
+
+
+def check_list_of_users(host):
+    name = generate_random(printable, 20)
+    p = generate_pswd(name)
+    data = {"username": name, "password": p}
+
+    session = requests.Session()    
+
+    session.post(f"http://{host}:{PORT}/signup", data = data)
+
+    session.post(f"http://{host}:{PORT}/auth", data = data)
+
+    session.post(f"http://{host}:{PORT}/logout")
+
+    second_one = generate_random(printable, 20)
+    p = generate_pswd(second_one)
+    data = {"username": second_one, "password": p}
+
+    session.post(f"http://{host}:{PORT}/signup", data = data)
+
+    session.post(f"http://{host}:{PORT}/auth", data = data)
+
+    t = session.get(f"http://{host}:{PORT}/bar")
+
+    if name in t.text:
+        return True
+    return False
+
 
 def check(host):
     try:
-        name = generate_random(printable, 20)
-        p = generate_pswd(name)
-        data = {"username": name, "password": p}
+        if not check_login_register(host):
+            die(ExitStatus.MUMBLE, "Bar wasn't achived")
 
-        session = requests.Session()
+        if not check_double_register:
+            die(ExitStatus.MUMBLE, "Reregistration is possible")
         
-        session.post(f"http://{host}:{PORT}/signup", data = data)
+        if not check_list_of_users:
+            die(ExitStatus.MUMBLE, "List of users was hidden")
 
-        
+
+        die(ExitStatus.OK, "Everything was OK")
     except Exception:
-        return ExitStatus.DOWN
-
-
-    die(ExitStatus.CHECKER_ERROR, "Not implemented")
+        die(ExitStatus.DOWN, "Exception was recieved")
 
 
 def generate_random(alph, length):
