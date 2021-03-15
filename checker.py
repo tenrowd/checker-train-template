@@ -116,12 +116,11 @@ def check(host):
         if not check_login_register(host):
             die(ExitStatus.MUMBLE, "Bar wasn't achived")
 
-        if not check_double_register(host):
-            die(ExitStatus.MUMBLE, "Reregistration is possible")
-        
         if not check_list_of_users(host):
             die(ExitStatus.MUMBLE, "List of users was hidden")
 
+        if not check_double_register(host):
+            die(ExitStatus.MUMBLE, "Reregistration is possible")
 
         die(ExitStatus.OK, "Everything was OK")
     except Exception:
