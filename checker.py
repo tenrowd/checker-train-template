@@ -98,7 +98,7 @@ def check_list_of_users(host):
 
     t = session.get(f"http://{host}:{PORT}/bar")
 
-    if name in t.text:
+    if name in t.text and second_one in t.text:
         return True
     return False
 
@@ -108,10 +108,10 @@ def check(host):
         if not check_login_register(host):
             die(ExitStatus.MUMBLE, "Bar wasn't achived")
 
-        if not check_double_register:
+        if not check_double_register(host):
             die(ExitStatus.MUMBLE, "Reregistration is possible")
         
-        if not check_list_of_users:
+        if not check_list_of_users(host):
             die(ExitStatus.MUMBLE, "List of users was hidden")
 
 
